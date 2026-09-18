@@ -30,7 +30,7 @@ Esta relación fundamenta el **muestreo pseudoaleatorio exacto** (`rand`) sin ap
 
 La función de supervivencia $S(x) = P(X \ge x)$ y la acumulada $F(x) = P(X \le x)$ se calculan de forma nativa mediante la función Marcum-$Q$ generalizada de orden $m = k/2$:
 
-$$S(x) = Q_{k/2}\left(\lambda \sqrt{T}, x \sqrt{T}\right) = \operatorname{ccdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$ $$F(x) = 1 - S(x) = \operatorname{cdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$
+$$S(x) = Q_{k/2}\left(\lambda \sqrt{T}, x \sqrt{T}\right) = \mathrm{ccdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$ $$F(x) = 1 - S(x) = \mathrm{cdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$
 
 Para la **cola superior lejana** ($x \gg \lambda$, es decir $b - a \ge 4$ y $ab \ge 30$), `marcumq` conmuta automáticamente a la expansión asintótica `marcumq_asymp`, que elimina cancelaciones catastróficas y falsos suelos de ruido numérico en probabilidades extremas ($\sim 10^{-50}$).
 
