@@ -16,7 +16,7 @@ Para una variable aleatoria real no negativa $X \ge 0$:
 
 $$f_P(x; \lambda, k, T) = T \frac{x^{k/2}}{\lambda^{k/2 - 1}} \exp\!\left(-\frac{T}{2}(x^2 + \lambda^2)\right) I_{k/2 - 1}(x \lambda T)$$
 
-donde: - $\lambda \ge 0$: Norma euclídea del vector de medias de las componentes ($\lambda = \|\boldsymbol{\mu}\| = \sqrt{\sum \mu_j^2}$). - $k \ge 1$: Dimensión efectiva continua ($k \in [1, d]$). - $T > 0$: Parámetro de precisión / escala inversa ($T = 1/\sigma^2$). - $I_\nu(z)$: Función de Bessel modificada de primera especie de orden $\nu = k/2 - 1$.
+donde: - $\lambda \ge 0$: Norma euclídea del vector de medias de las componentes $\left(\lambda = \|\boldsymbol{\mu}\| = \sqrt{\sum \mu_j^2}\right)$. - $k \ge 1$: Dimensión efectiva continua ($k \in [1, d]$). - $T > 0$: Parámetro de precisión / escala inversa ($T = 1/\sigma^2$). - $I_\nu(z)$: Función de Bessel modificada de primera especie de orden $\nu = k/2 - 1$.
 
 ### 2. Relación con la distribución $\chi^2$ no central y Muestreo Exacto
 
