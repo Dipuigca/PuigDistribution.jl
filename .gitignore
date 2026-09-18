@@ -25,3 +25,20 @@ docs/Manifest.toml
 
 # OS
 Desktop.ini
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+python/build/
+python/dist/
+python/*.egg-info/
+
+# R
+R/src/
+R/*.tar.gz
+R/*.Rcheck/
+
+# MATLAB
+matlab/*.mlx
+matlab/tests/results/

@@ -1,0 +1,18 @@
+Package: puigdist
+Type: Package
+Title: Distribución de Puig (chi no central generalizada de dimensión real k)
+Version: 0.1.0
+Authors@R: person("Diego", "Puig", email = "dpuig@upv.es", role = c("aut", "cre"))
+Description: Port a R del paquete Julia DistributionsPuig.jl: distribución chi no
+    central generalizada con dimensión efectiva real k (> = 1), parametrizada por
+    (lambda, k, T) con T = 1/B^2. Incluye densidad, supervivencia, acumulada,
+    momentos, cuantiles, muestreo, ajuste (Puig_fit) y visualización mediante
+    ggplot2. Validada contra golden files generados por Julia.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.0)
+Imports: stats
+Suggests: ggplot2, Rmpfr, gmp
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+NeedsCompilation: no
