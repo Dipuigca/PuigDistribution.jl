@@ -50,13 +50,13 @@ S(x) = Q_{k/2}\left(\lambda \sqrt{T}, x \sqrt{T}\right)
 En `DistributionsPuig.jl`, la evaluación de $Q_m(a, b)$ se calcula de forma nativa sin llamadas a librerías externas mediante el complemento de la acumulada de la $\chi^2$ no central:
 
 ```math
-S(x) = \operatorname{ccdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)
+S(x) = \mathrm{ccdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)
 ```
 
 La función de distribución acumulada (CDF) es complementaria:
 
 ```math
-F(x) = 1 - S(x) = \operatorname{cdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)
+F(x) = 1 - S(x) = \mathrm{cdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)
 ```
 
 ---
@@ -71,7 +71,7 @@ Inspirado en la razón de participación empleada en neurociencia y física esta
 k = \frac{\left(\sum_{i=1}^d \lambda_i\right)^2}{\sum_{i=1}^d \lambda_i^2}
 ```
 
-Dado que la traza de la matriz de correlación es constante ($\operatorname{tr}(R) = \sum_{i=1}^d \lambda_i = d$) y que la suma de los cuadrados de los autovalores coincide idénticamente con el cuadrado de la norma de Frobenius $\|R\|_F^2$:
+Dado que la traza de la matriz de correlación es constante ($\mathrm{tr}(R) = \sum_{i=1}^d \lambda_i = d$) y que la suma de los cuadrados de los autovalores coincide idénticamente con el cuadrado de la norma de Frobenius $\|R\|_F^2$:
 
 ```math
 \sum_{i=1}^d \lambda_i^2 = \|R\|_F^2 = d + 2 \sum_{i < j} R_{ij}^2

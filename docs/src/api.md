@@ -69,8 +69,8 @@ dist, ind, st = Puig_fit(df)
 
 ### Momentos y Estadísticos Teóricos
 * `Puig_mean(λ, k, T)` / `Puig_mean(params)`: Media teórica $\mu_1 = E[X]$ vía función de Laguerre generalizada.
-* `Puig_var(λ, k, T)` / `Puig_var(params)`: Varianza teórica $\operatorname{Var}(X) = E[X^2] - (E[X])^2$.
-* `Puig_std(λ, k, T)` / `Puig_std(params)`: Desviación estándar teórica $\sigma = \sqrt{\operatorname{Var}(X)}$.
+* `Puig_var(λ, k, T)` / `Puig_var(params)`: Varianza teórica $\mathrm{Var}(X) = E[X^2] - (E[X])^2$.
+* `Puig_std(λ, k, T)` / `Puig_std(params)`: Desviación estándar teórica $\sigma = \sqrt{\mathrm{Var}(X)}$.
 * `Puig_skewness(λ, k, T)` / `Puig_skewness(params)`: Coeficiente de asimetría (*skewness*) estandarizado $\gamma_1$.
 * `Puig_kurtosis(λ, k, T)` / `Puig_kurtosis(params)`: *Kurtosis* teórica $\gamma_2 = E[(X-\mu)^4] / \sigma^4$.
 * `Puig_moments(λ, k, T)` / `Puig_moments(params)`: Tupla con los 4 primeros momentos raw $(\mu_1, \mu_2, \mu_3, \mu_4)$.

@@ -30,7 +30,7 @@ Esta relación fundamenta el **muestreo pseudoaleatorio exacto** (`rand`) sin ap
 
 La función de supervivencia $S(x) = P(X \ge x)$ y la acumulada $F(x) = P(X \le x)$ se calculan de forma nativa mediante la función Marcum-$Q$ generalizada de orden $m = k/2$:
 
-$$S(x) = Q_{k/2}\left(\lambda \sqrt{T}, x \sqrt{T}\right) = \operatorname{ccdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$ $$F(x) = 1 - S(x) = \operatorname{cdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$
+$$S(x) = Q_{k/2}\left(\lambda \sqrt{T}, x \sqrt{T}\right) = \mathrm{ccdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$ $$F(x) = 1 - S(x) = \mathrm{cdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$
 
 Para la **cola superior lejana** ($x \gg \lambda$, es decir $b - a \ge 4$ y $ab \ge 30$), `marcumq` conmuta automáticamente a la expansión asintótica `marcumq_asymp`, que elimina cancelaciones catastróficas y falsos suelos de ruido numérico en probabilidades extremas ($\sim 10^{-50}$).
 
@@ -187,6 +187,28 @@ Puig_plot(distribucion, ("pdf", "surv"))
 ```
 
 ------------------------------------------------------------------------
+
+## 🐍📊⚙️ Portes a Python, R y MATLAB
+
+Además de la implementación Julia, este repositorio incluye **portes funcionales** a Python, R y MATLAB del mismo núcleo matemático (PDF con doble estabilidad numérica, supervivencia/acumulada por Marcum-`Q`, momentos por recurrencia, `Puig_fit`, muestreo exacto), **validados de forma cruzada** contra golden files generados desde Julia.
+
+| Lenguaje | Golden | Unitarios |
+|:---|:---|:---|
+| Python | 4102 PASS | 28 PASS |
+| R | 4102 PASS | 108 PASS |
+| MATLAB | 4102 PASS | 106 PASS |
+
+```
+python/src/puigdist/   pip install . ; incluye interfaz scipy rv_continuous
+R/                     paquete R con dpuig/ppuig/qpuig/rpuig (DESCRIPTION/NAMESPACE)
+matlab/+puigdist/      28 funciones + clases PuigDistribution y MB
+```
+
+Detalles de arquitectura, el fix compartido de `laguerre_real` para momentos
+con λ grande y las instrucciones de ejecución de cada suite en
+**[PORTING.md](PORTING.md)**.
+
+-----------------------------------------------------------------------
 
 ## 🧪 Pruebas Automatizadas
 
