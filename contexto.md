@@ -98,13 +98,13 @@ return sqrt(W / T)
 
 ### 3.3. Supervivencia y Acumulada nativas (Función Marcum-$Q$)
 
-La función de supervivencia $S(x) = P(X \ge x)$ y la función acumulada $F(x) = P(X \le x)$ se calculan de manera nativa sin dependencias externas en C, R o Fortran mediante la función Marcum-$Q$ generalizada de orden $m = k/2$: $$S(x) = Q_{k/2}\left(\lambda \sqrt{T}, x \sqrt{T}\right) = \operatorname{ccdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$ $$F(x) = 1 - S(x) = \operatorname{cdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$
+La función de supervivencia $S(x) = P(X \ge x)$ y la función acumulada $F(x) = P(X \le x)$ se calculan de manera nativa sin dependencias externas en C, R o Fortran mediante la función Marcum-$Q$ generalizada de orden $m = k/2$: $$S(x) = Q_{k/2}\left(\lambda \sqrt{T}, x \sqrt{T}\right) = \mathrm{ccdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$ $$F(x) = 1 - S(x) = \mathrm{cdf}\left(\text{NoncentralChisq}(k, \lambda^2 T), x^2 T\right)$$
 
 ### 3.4. Dimensión efectiva optimizada en $\mathcal{O}(d^2)$ con 0 alocaciones
 
 A partir de la matriz de correlación muestral $R \in \mathbb{R}^{d \times d}$, la dimensión efectiva (razón de participación) se define como: $$k = \frac{\left(\sum_{i=1}^d \lambda_i\right)^2}{\sum_{i=1}^d \lambda_i^2}$$
 
-Aprovechando que la traza de $R$ es constante ($\operatorname{tr}(R) = \sum \lambda_i = d$) y que la suma de los cuadrados de los autovalores es idénticamente la norma de Frobenius al cuadrado $\|R\|_F^2 = d + 2\sum_{i < j} R_{ij}^2$, se obtiene la forma cerrada: $$k = \frac{d^2}{d + 2 \sum_{i < j} R_{ij}^2}$$
+Aprovechando que la traza de $R$ es constante ($\mathrm{tr}(R) = \sum \lambda_i = d$) y que la suma de los cuadrados de los autovalores es idénticamente la norma de Frobenius al cuadrado $\|R\|_F^2 = d + 2\sum_{i < j} R_{ij}^2$, se obtiene la forma cerrada: $$k = \frac{d^2}{d + 2 \sum_{i < j} R_{ij}^2}$$
 
 **Ventaja computacional:** Evita la descomposición espectral completa (`eigvals` vía LAPACK, que es $\mathcal{O}(d^3)$ y aloca memoria), reduciendo el cómputo a un simple bucle triangular sobre la matriz de correlación en $\mathcal{O}(d^2)$ con 0 alocaciones en el heap.
 
@@ -116,7 +116,7 @@ Aprovechando que la traza de $R$ es constante ($\operatorname{tr}(R) = \sum \lam
 
 La evaluación de las funciones de Laguerre de orden fraccionario $L_n^{(\alpha)}(z)$ se realiza mediante la función hipergeométrica confluente de Kummer $M(a, b, z)$ implementada con precisión arbitraria en `src/puig_pdf.jl` (`kummer_M_stable`).
 
-A partir de $\mu_1, \dots, \mu_4$ se deducen de forma exacta: $$\operatorname{Var}(X) = \mu_2 - \mu_1^2, \quad \sigma = \sqrt{\operatorname{Var}(X)}$$ $$\text{Skewness } (\gamma_1) = \frac{\mu_3 - 3\mu_1\mu_2 + 2\mu_1^3}{\sigma^3}$$ $$\text{Kurtosis } (\gamma_2) = \frac{\mu_4 - 4\mu_1\mu_3 + 6\mu_1^2\mu_2 - 3\mu_1^4}{\sigma^4}$$
+A partir de $\mu_1, \dots, \mu_4$ se deducen de forma exacta: $$\mathrm{Var}(X) = \mu_2 - \mu_1^2, \quad \sigma = \sqrt{**\operatorname**{Var}(X)}$$ $$\text{Skewness } (\gamma_1) = \frac{\mu_3 - 3\mu_1\mu_2 + 2\mu_1^3}{\sigma^3}$$ $$\text{Kurtosis } (\gamma_2) = \frac{\mu_4 - 4\mu_1\mu_3 + 6\mu_1^2\mu_2 - 3\mu_1^4}{\sigma^4}$$
 
 ### 3.6. Caso Límite $\lambda \to 0$ (Maxwell-Boltzmann / $\chi$ Generalizada)
 
