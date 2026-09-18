@@ -53,6 +53,7 @@ class PuigStats:
 
 
 def calc_r2(S_emp, S_mod):
+    """Coeficiente de determinación R² = 1 - Σ(S_emp−S_mod)² / Σ(S_emp−S̄_emp)²."""
     S_emp = np.asarray(S_emp, float)
     S_mod = np.asarray(S_mod, float)
     denom = np.sum((S_emp - np.mean(S_emp)) ** 2)
@@ -60,18 +61,22 @@ def calc_r2(S_emp, S_mod):
 
 
 def calc_mae(S_emp, S_mod):
+    """Error absoluto medio MAE = mean(|S_emp − S_mod|)."""
     return float(np.mean(np.abs(np.asarray(S_emp, float) - np.asarray(S_mod, float))))
 
 
 def calc_rmse(S_emp, S_mod):
+    """Raíz del error cuadrático medio RMSE = sqrt(mean((S_emp − S_mod)²))."""
     return float(np.sqrt(np.mean((np.asarray(S_emp, float) - np.asarray(S_mod, float)) ** 2)))
 
 
 def calc_maxae(S_emp, S_mod):
+    """Error absoluto máximo MaxAE = max(|S_emp − S_mod|)."""
     return float(np.max(np.abs(np.asarray(S_emp, float) - np.asarray(S_mod, float))))
 
 
 def calc_iae(x, S_emp, S_mod):
+    """Error absoluto integrado IAE = ∫|S_emp − S_mod| dx (regla del trapecio)."""
     x = np.asarray(x, float)
     diffs = np.abs(np.asarray(S_emp, float) - np.asarray(S_mod, float))
     dx = np.diff(x)
@@ -79,6 +84,7 @@ def calc_iae(x, S_emp, S_mod):
 
 
 def calc_all_metrics(x, S_emp, S_mod):
+    """Calcula R², MAE, RMSE, MaxAE e IAE a la vez y devuelve un ``PuigStats``."""
     return PuigStats(
         calc_r2(S_emp, S_mod),
         calc_mae(S_emp, S_mod),
@@ -157,6 +163,7 @@ class PuigFitResult:
 # ---------------------------------------------------------------------------
 
 def _err_l1(B, x_opt, S_emp, lam, k_target):
+    """Error L1 (matriz) entre S empírica y modelo con (λ, k_target, T=1/B²)."""
     if B <= 0:
         return 1e12
     T_val = 1.0 / B ** 2
@@ -168,6 +175,7 @@ def _err_l1(B, x_opt, S_emp, lam, k_target):
 
 
 def _err_l2_matrix(par, x_opt, S_emp, lam):
+    """Error L2 (matriz) en la parametrización (k, B) con λ fijo."""
     k_val, B_val = par[0], par[1]
     if k_val < 1.0 or B_val <= 0.0:
         return 1e12
@@ -187,6 +195,7 @@ def _err_l2_matrix(par, x_opt, S_emp, lam):
 # ---------------------------------------------------------------------------
 
 def _fit_matrix(Data, times=None, method="dynamic"):
+    """Ajuste desde matriz N×d (filas = observaciones). Ver ``Puig_fit``."""
     Data = np.asarray(Data, float)
     n_obs, d = Data.shape
     if n_obs < 10:
@@ -261,6 +270,7 @@ def _fit_matrix(Data, times=None, method="dynamic"):
 # ---------------------------------------------------------------------------
 
 def _fit_dataframe(df, vars=None, time_col=None, method="dynamic"):
+    """Ajuste desde DataFrame pandas. Ver ``Puig_fit``."""
     import pandas as pd
 
     var_names = vars
@@ -285,6 +295,7 @@ def _fit_dataframe(df, vars=None, time_col=None, method="dynamic"):
 # ---------------------------------------------------------------------------
 
 def _err_2d_fixed(p, x_opt, S_emp, k_target):
+    """Error L2 (vector 1D) en (log λ, log B) con k fijo."""
     lam_val = np.exp(p[0])
     B_val = np.exp(p[1])
     T_val = 1.0 / B_val ** 2
@@ -299,6 +310,7 @@ def _err_2d_fixed(p, x_opt, S_emp, k_target):
 
 
 def _err_3d(p, x_opt, S_emp):
+    """Error L2 (vector 1D) en (log λ, log(k−1), log B)."""
     lam_val = np.exp(p[0])
     k_val = 1.0 + np.exp(p[1])
     B_val = np.exp(p[2])
@@ -316,6 +328,7 @@ def _err_3d(p, x_opt, S_emp):
 
 
 def _fit_vector(Data, method="dynamic", k_fixed=None):
+    """Ajuste desde vector 1D de normas observadas. Ver ``Puig_fit``."""
     Data = np.asarray(Data, float)
     valid = np.isfinite(Data) & (Data >= 0)
     t = Data[valid]

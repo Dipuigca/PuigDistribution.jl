@@ -93,6 +93,7 @@ def marcumq_asymp(a, b, m=1.0):
 
 
 def _marcumq_scalar(a, b, m):
+    """Marcum-Q escalar: asintótica en cola lejana o ncx2.sf en otro caso."""
     if (b - a) >= 4.0 and a * b >= 30.0:
         return marcumq_asymp(a, b, m)
     return float(ncx2.sf(b * b, 2.0 * m, a * a))
@@ -140,6 +141,19 @@ class PuigDistribution:
     """
 
     def __init__(self, lam, k, T):
+        """Construye una distribución de Puig.
+
+        Parámetros
+        ----------
+        lam : float
+            Norma del vector de medias (λ ≥ 0).
+        k : float
+            Dimensión efectiva continua (k ≥ 1).
+        T : float
+            Precisión / escala inversa (T > 0, T = 1/σ²).
+
+        Lanza ``ValueError`` si los parámetros quedan fuera de su dominio.
+        """
         lam, k, T = float(lam), float(k), float(T)
         if not lam >= 0:
             raise ValueError("λ debe ser ≥ 0")
@@ -152,62 +166,85 @@ class PuigDistribution:
         self.T = T
 
     def __iter__(self):
-        # Desempaquetado idiomático: lam, k, T = dist
+        """Desempaquetado idiomático: ``lam, k, T = dist``."""
         yield self.lam
         yield self.k
         yield self.T
 
     def __repr__(self):
+        """Representación compacta de la distribución."""
         return (f"PuigDistribution(λ={self.lam:g}, k={self.k:g}, "
                 f"T={self.T:g})")
 
     @property
     def lambda_(self):
+        """Alias del parámetro λ (evita colisión con la palabra clave ``lambda``)."""
         return self.lam
 
     def pdf(self, x, method="asymp"):
+        """Densidad f_P(x).
+
+        ``method='asymp'`` (por defecto) o ``'arb'`` (referencia mpmath).
+        """
         return Puig_pdf(x, self.lam, self.k, self.T, method=method)
 
     def logpdf(self, x):
+        """Log-densidad log f_P(x), estable numéricamente."""
         return Puig_logpdf(x, self.lam, self.k, self.T)
 
     def survival(self, x):
+        """Función de supervivencia S(x) = P(X ≥ x)."""
         return Puig_surviving(x, self.lam, self.k, self.T)
 
     def cumulative(self, x):
+        """Función de distribución F(x) = P(X ≤ x)."""
         return Puig_cumulative(x, self.lam, self.k, self.T)
 
     def quantile(self, p, tol=1e-10, maxit=200):
+        """Cuantil Q(p) tal que F(Q(p)) = p, por bisección."""
         return Puig_quantile(p, self.lam, self.k, self.T, tol=tol, maxit=maxit)
 
     def mean(self):
+        """Media teórica E[X]."""
         return Puig_mean(self.lam, self.k, self.T)
 
     def var(self):
+        """Varianza teórica Var(X)."""
         return Puig_var(self.lam, self.k, self.T)
 
     def std(self):
+        """Desviación estándar teórica σ."""
         return Puig_std(self.lam, self.k, self.T)
 
     def skewness(self):
+        """Asimetría estandarizada γ₁."""
         return Puig_skewness(self.lam, self.k, self.T)
 
     def kurtosis(self):
+        """Kurtosis (4º momento estandarizado, no restado) γ₂."""
         return Puig_kurtosis(self.lam, self.k, self.T)
 
     def moments(self, n=4):
+        """Momentos raw μ₁, …, μₙ (los 4 primeros como tupla con n=4)."""
         return Puig_moments(self.lam, self.k, self.T, n)
 
     def stats(self):
+        """Diccionario con mean, var, sig, skewness, kurtosis."""
         return Puig_stats(self.lam, self.k, self.T)
 
     def hazard(self, x):
+        """Función de riesgo h(x) = f(x) / S(x)."""
         return Puig_hazard(x, self.lam, self.k, self.T)
 
     def rvs(self, size=1, rng=None):
+        """Muestreo pseudoaleatorio exacto de tamaño ``size``.
+
+        ``rng`` puede ser un ``numpy.random.Generator``/``RandomState``.
+        """
         return Puig_rand(size, self.lam, self.k, self.T, rng=rng)
 
     def entropy(self, N=400):
+        """Entropía diferencial H(X) = -∫ f(x)·log f(x) dx (trapecio)."""
         return Puig_entropy(self, N=N)
 
 
@@ -216,6 +253,7 @@ class PuigDistribution:
 # ---------------------------------------------------------------------------
 
 def _check_params(lam, k, T):
+    """Valida y convierte los parámetros (λ≥0, k≥1, T>0)."""
     if not lam >= 0:
         raise ValueError("λ debe ser ≥ 0")
     if not k >= 1:
@@ -296,6 +334,7 @@ def Puig_logpdf(x, lam, k, T):
 
 
 def _loggamma(x):
+    """Log-gamma (wrapper de scipy.special.gammaln)."""
     from scipy.special import gammaln
 
     return gammaln(x)
@@ -346,11 +385,13 @@ def Puig_cumulative(x, lam, k, T):
 # ---------------------------------------------------------------------------
 
 def _mean_formula(lam, k, T):
+    """Fórmula de μ₁ = √(π/(2T))·L_{1/2}^{(k/2-1)}(-λ²T/2)."""
     ls = lam * np.sqrt(T)
     return np.sqrt(np.pi / (2.0 * T)) * laguerre_real(0.5, k / 2.0 - 1.0, -ls ** 2 / 2.0)
 
 
 def _moment3_formula(lam, k, T):
+    """Fórmula de μ₃ = (3/T)·√(π/(2T))·L_{3/2}^{(k/2-1)}(-λ²T/2)."""
     ls = lam * np.sqrt(T)
     L = laguerre_real(1.5, k / 2.0 - 1.0, -ls ** 2 / 2.0)
     return (3.0 / T) * np.sqrt(np.pi / (2.0 * T)) * L

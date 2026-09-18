@@ -33,6 +33,7 @@ def kummer_M_stable(a, b, z, maxterms=15000):
 
 
 def _pochhammer(x, k):
+    """Símbolo de Pochhammer (x)ₖ = x(x+1)···(x+k−1)."""
     out = mp.mpf(1)
     for j in range(k):
         out *= x + j

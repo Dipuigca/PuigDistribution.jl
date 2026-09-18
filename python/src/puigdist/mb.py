@@ -31,42 +31,51 @@ class MB:
     B: float
 
     def __post_init__(self):
+        """Valida los parámetros (k ≥ 1, B > 0)."""
         if not (self.k >= 1):
             raise ValueError("k debe ser ≥ 1")
         if not (self.B > 0):
             raise ValueError("B debe ser > 0")
 
     def pdf(self, x):
+        """Densidad f(x; k, B)."""
         return MB_pdf(x, self.k, self.B)
 
     def survival(self, x):
+        """Supervivencia S(x) = P(X ≥ x)."""
         return MB_surviving(x, self.k, self.B)
 
     def cumulative(self, x):
+        """Acumulada F(x) = P(X ≤ x)."""
         return MB_cumulative(x, self.k, self.B)
 
     def mean(self):
+        """Media teórica E[X] (caso límite λ = 0)."""
         from .core import Puig_mean
 
         return Puig_mean(0.0, self.k, 1.0 / self.B)
 
     def var(self):
+        """Varianza teórica Var(X) (caso límite λ = 0)."""
         from .core import Puig_var
 
         return Puig_var(0.0, self.k, 1.0 / self.B)
 
     def std(self):
+        """Desviación estándar teórica σ (caso límite λ = 0)."""
         from .core import Puig_std
 
         return Puig_std(0.0, self.k, 1.0 / self.B)
 
     def moments(self, n=4):
+        """Momentos raw μ₁, …, μₙ (caso límite λ = 0)."""
         from .core import Puig_moments
 
         return Puig_moments(0.0, self.k, 1.0 / self.B, n)
 
 
 def _check(k, B):
+    """Valida y convierte (k ≥ 1, B > 0) a float."""
     if not (B > 0):
         raise ValueError("B debe ser > 0")
     if not (k >= 1):
