@@ -7,6 +7,17 @@
   if (z >= 200.0) besselix_asymp(nu, z) else besselI(z, nu, expon.scaled = TRUE)
 }
 
+#' Bessel I modificada escalada asintótica: \eqn{e^{-z} I_\nu(z)}.
+#'
+#' Expansión asintótica de 5 términos (DLMF 10.40.1). Precisión relativa
+#' < 1e-12 para \eqn{z \ge 100} y < 1e-15 para \eqn{z \ge 200}. R devuelve 0
+#' para \eqn{z} muy grande con \code{expon.scaled = TRUE}, por lo que la
+#' rama asintótica es obligatoria en ese régimen.
+#'
+#' @param nu Orden real del Bessel (\eqn{\nu}).
+#' @param z Argumento (puede ser escalar; se vectoriza con \code{vapply}).
+#' @return \code{e^{-z} I_\nu(z)} como vector numérico.
+#' @export
 besselix_asymp <- function(nu, z) {
   nu <- as.numeric(nu); z <- as.numeric(z)
   mu <- 4.0 * nu * nu
@@ -24,6 +35,17 @@ besselix_asymp <- function(nu, z) {
   res / sqrt(2.0 * pi * z)
 }
 
+#' Marcum-Q asintótica de cola superior lejana.
+#'
+#' Expansión asintótica de 2 términos (Cantrell 1986) válida para
+#' \eqn{b - a \ge 4} y \eqn{ab \ge 30}. Evita cancelaciones catastróficas
+#' y falsos suelos de ruido numérico en probabilidades extremas (~1e-50).
+#'
+#' @param a Parámetro \eqn{a} (p. ej. \eqn{\lambda\sqrt{T}}).
+#' @param b Argumento \eqn{b} (p. ej. \eqn{x\sqrt{T}}).
+#' @param m Orden de la Marcum-Q (p. ej. \eqn{k/2}).
+#' @return Probabilidad de la cola superior en \eqn{[0, 1]}.
+#' @export
 marcumq_asymp <- function(a, b, m = 1.0) {
   a <- as.numeric(a); b <- as.numeric(b); m <- as.numeric(m)
   if (b - a < 4.0) stop("marcumq_asymp requiere b - a \u2265 4.0")
@@ -50,7 +72,16 @@ marcumq_asymp <- function(a, b, m = 1.0) {
   suppressWarnings(pchisq(b * b, 2.0 * m, ncp = a * a, lower.tail = FALSE))
 }
 
-#' Función Marcum-Q generalizada Q_m(a,b). Vectorizada sobre b.
+#' Función Marcum-Q generalizada \eqn{Q_m(a,b)}.
+#'
+#' \deqn{Q_m(a, b) = \operatorname{ccdf}\left(\text{NoncentralChisq}(2m, a^2), b^2\right)}
+#' Para la cola superior lejana (\eqn{b - a \ge 4} y \eqn{ab \ge 30}) conmuta
+#' automáticamente a \code{\link{marcumq_asymp}}.
+#'
+#' @param a Parámetro \eqn{a} (p. ej. \eqn{\lambda\sqrt{T}}).
+#' @param b Argumento \eqn{b} (p. ej. \eqn{x\sqrt{T}}); puede ser vector.
+#' @param m Orden real de la Marcum-Q (p. ej. \eqn{k/2}).
+#' @return Probabilidad de la cola superior (escalar o vector como \code{b}).
 #' @export
 marcumq <- function(a, b, m = 1.0) {
   a <- as.numeric(a); m <- as.numeric(m)
@@ -81,12 +112,42 @@ marcumq <- function(a, b, m = 1.0) {
   1.0 - .mb_surviving(x, k, B)
 }
 
+#' PDF del caso límite Maxwell–Boltzmann (\eqn{\lambda = 0}).
+#'
+#' \deqn{f(x; k, B) = 2^{1-k/2} B^{-k/2} / \Gamma(k/2) \cdot x^{k-1}
+#'   \exp(-x^2 / (2B))}
+#'
+#' @param x Vector de puntos de evaluación (\eqn{x \ge 0}).
+#' @param k Dimensión / grados de libertad reales (\eqn{k \ge 1}).
+#' @param B Parámetro de escala (\eqn{B > 0}, con \eqn{B = 1/T}).
+#' @return Densidad \eqn{f(x)} (misma longitud que \code{x}).
+#' @export
 MB_pdf <- function(x, k, B) {
   xout <- .mb_pdf(as.numeric(x), k, B)
   if (length(x) == 1L) as.numeric(xout) else as.numeric(xout)
 }
 
+#' Supervivencia del caso límite Maxwell–Boltzmann.
+#'
+#' \deqn{S(x) = \Gamma(k/2, x^2/(2B)) / \Gamma(k/2)}
+#' (gamma incompleta superior regularizada).
+#'
+#' @param x Vector de puntos de evaluación (\eqn{x \ge 0}).
+#' @param k Dimensión / grados de libertad reales (\eqn{k \ge 1}).
+#' @param B Parámetro de escala (\eqn{B > 0}).
+#' @return Supervivencia \eqn{S(x)} en \eqn{[0, 1]}.
+#' @export
 MB_surviving <- function(x, k, B) .mb_surviving(as.numeric(x), k, B)
+
+#' Acumulada del caso límite Maxwell–Boltzmann.
+#'
+#' \deqn{F(x) = 1 - S(x)}
+#'
+#' @param x Vector de puntos de evaluación (\eqn{x \ge 0}).
+#' @param k Dimensión / grados de libertad reales (\eqn{k \ge 1}).
+#' @param B Parámetro de escala (\eqn{B > 0}).
+#' @return Acumulada \eqn{F(x)} en \eqn{[0, 1]}.
+#' @export
 MB_cumulative <- function(x, k, B) .mb_cumulative(as.numeric(x), k, B)
 
 # ---- Núcleo de la PDF de Puig ----
@@ -180,6 +241,22 @@ MB_cumulative <- function(x, k, B) .mb_cumulative(as.numeric(x), k, B)
 # ---- API pública (acepta objetos o parámetros escalares) ----
 
 #' Densidad de la distribución de Puig.
+#'
+#' \deqn{f_P(x; \lambda, k, T) = T x^{k/2} / \lambda^{k/2-1}
+#'   \exp(-T/2(x^2+\lambda^2)) I_{k/2-1}(x\lambda T)}
+#' con \eqn{\lambda \ge 0}, \eqn{k \ge 1}, \eqn{T > 0}.
+#'
+#' @param x Puntos de evaluación (\eqn{x \ge 0}); puede ser vector.
+#' @param lam Parámetro de ubicación de medias (\eqn{\lambda \ge 0}), objeto
+#'   \code{PuigDistribution} o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}); ignorado si \code{lam}
+#'   es un objeto.
+#' @param T Escala / precisión (\eqn{T > 0}, \eqn{T = 1/\sigma^2}); ignorado si
+#'   \code{lam} es un objeto.
+#' @param method \code{"asymp"} (por defecto): Bessel escalada + expansión
+#'   asintótica para \eqn{z \ge 200}; \code{"arb"}: referencia doble con Bessel
+#'   exacta para \eqn{z < 200}.
+#' @return Densidad \eqn{f(x)} (escalar o vector).
 #' @export
 Puig_pdf <- function(x, lam, k, T, method = "asymp") {
   stopifnot(length(lam) == 1 || (is.PuigDistribution(lam)) || is.MB(lam))
@@ -197,6 +274,16 @@ Puig_pdf <- function(x, lam, k, T, method = "asymp") {
 }
 
 #' Log-densidad de la distribución de Puig.
+#'
+#' \eqn{\log f_P(x)} numéricamente estable mediante Bessel escalada
+#' (\code{expon.scaled = TRUE}); \code{-Inf} en \eqn{x = 0}.
+#'
+#' @param x Puntos de evaluación (\eqn{x \ge 0}); puede ser vector.
+#' @param lam Parámetro \eqn{\lambda \ge 0}, objeto \code{PuigDistribution} o
+#'   \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Log-densidad (escalar o vector).
 #' @export
 Puig_logpdf <- function(x, lam, k, T) {
   x <- as.numeric(x)
@@ -225,7 +312,17 @@ Puig_logpdf <- function(x, lam, k, T) {
   out
 }
 
-#' Supervivencia S(x) = P(X \u2265 x).
+#' Supervivencia \eqn{S(x) = P(X \ge x)}.
+#'
+#' \deqn{S(x) = Q_{k/2}(\lambda\sqrt{T}, x\sqrt{T})}
+#' mediante la Marcum-Q generalizada (conmuta a la asintótica en colas lejanas).
+#'
+#' @param x Puntos de evaluación (\eqn{x \ge 0}); puede ser vector.
+#' @param lam Parámetro \eqn{\lambda \ge 0}, objeto \code{PuigDistribution} o
+#'   \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Supervivencia en \eqn{[0, 1]} (escalar o vector).
 #' @export
 Puig_surviving <- function(x, lam, k, T) {
   x <- as.numeric(x)
@@ -238,7 +335,16 @@ Puig_surviving <- function(x, lam, k, T) {
   1.0 - .puig_surviving(x, lam, k, T)
 }
 
-#' Acumulada F(x) = P(X \u2264 x).
+#' Acumulada \eqn{F(x) = P(X \le x)}.
+#'
+#' Complementaria de la supervivencia: \eqn{F(x) = 1 - S(x)}.
+#'
+#' @param x Puntos de evaluación (\eqn{x \ge 0}); puede ser vector.
+#' @param lam Parámetro \eqn{\lambda \ge 0}, objeto \code{PuigDistribution} o
+#'   \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Acumulada en \eqn{[0, 1]} (escalar o vector).
 #' @export
 Puig_cumulative <- function(x, lam, k, T) {
   x <- as.numeric(x)
@@ -253,7 +359,17 @@ Puig_cumulative <- function(x, lam, k, T) {
   f / S
 }
 
-#' Función de riesgo h(x) = f(x)/S(x).
+#' Función de riesgo \eqn{h(x) = f(x)/S(x)}.
+#'
+#' Tasa de fallo instantánea de la distribución de Puig para \eqn{x} donde
+#' \eqn{S(x) > 0}.
+#'
+#' @param x Puntos de evaluación (\eqn{x \ge 0}); puede ser vector.
+#' @param lam Parámetro \eqn{\lambda \ge 0}, objeto \code{PuigDistribution} o
+#'   \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Riesgo \eqn{h(x)} (escalar o vector).
 #' @export
 Puig_hazard <- function(x, lam, k, T) {
   x <- as.numeric(x)

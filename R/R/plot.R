@@ -50,8 +50,14 @@
 
 #' Representaciones gráficas de la distribución de Puig (ggplot2).
 #'
-#' `options` puede ser `"all"` (lista de 4 ggplots), o una de `"pdf"`,
-#' `"cdf"`, `"surv"`, `"data"`. Devuelve una lista de objetos ggplot.
+#' `options` puede ser \code{"all"} (lista de 4 ggplots), o una de
+#' \code{"pdf"}, \code{"cdf"}, \code{"surv"}, \code{"data"}. Devuelve una
+#' lista de objetos ggplot (o un único objeto si \code{options} es uno solo).
+#'
+#' @param dist Objeto \code{PuigDistribution} o \code{MB}.
+#' @param options Carácter o vector: \code{"pdf"}, \code{"cdf"},
+#'   \code{"surv"}, \code{"data"} o \code{"all"}.
+#' @return Lista de objetos ggplot2 (o un único ggplot).
 #' @export
 Puig_plot <- function(dist, options = "all") {
   if (is.MB(dist)) {

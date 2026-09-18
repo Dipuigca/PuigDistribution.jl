@@ -1,22 +1,59 @@
 # Métricas de bondad de ajuste + dimensión efectiva + supervivencia empírica.
 
+#' Coeficiente de determinación R².
+#'
+#' \deqn{R^2 = 1 - \sum(S_{emp}-S_{mod})^2 / \sum(S_{emp}-\bar S_{emp})^2}
+#' sobre la supervivencia (empírica vs. modelada).
+#'
+#' @param S_emp Supervivencia empírica.
+#' @param S_mod Supervivencia modelada (misma longitud que \code{S_emp}).
+#' @return Escalar en \eqn{(-\infty, 1]}.
+#' @export
 calc_r2 <- function(S_emp, S_mod) {
   S_emp <- as.numeric(S_emp); S_mod <- as.numeric(S_mod)
   1.0 - sum((S_emp - S_mod)^2) / sum((S_emp - mean(S_emp))^2)
 }
 
+#' Error absoluto medio (MAE).
+#'
+#' @param S_emp Supervivencia empírica.
+#' @param S_mod Supervivencia modelada (misma longitud).
+#' @return Escalar \eqn{\ge 0}.
+#' @export
 calc_mae <- function(S_emp, S_mod) {
   mean(abs(as.numeric(S_emp) - as.numeric(S_mod)))
 }
 
+#' Raíz del error cuadrático medio (RMSE).
+#'
+#' @param S_emp Supervivencia empírica.
+#' @param S_mod Supervivencia modelada (misma longitud).
+#' @return Escalar \eqn{\ge 0}.
+#' @export
 calc_rmse <- function(S_emp, S_mod) {
   sqrt(mean((as.numeric(S_emp) - as.numeric(S_mod))^2))
 }
 
+#' Error absoluto máximo (MaxAE).
+#'
+#' @param S_emp Supervivencia empírica.
+#' @param S_mod Supervivencia modelada (misma longitud).
+#' @return Escalar \eqn{\ge 0}.
+#' @export
 calc_maxae <- function(S_emp, S_mod) {
   max(abs(as.numeric(S_emp) - as.numeric(S_mod)))
 }
 
+#' Error absoluto integrado (IAE) por la regla del trapecio.
+#'
+#' \deqn{IAE = \int_x |S_{emp}(x) - S_{mod}(x)| \, dx}
+#' aproximado con la regla del trapecio sobre la rejilla \code{x}.
+#'
+#' @param x Rejilla de puntos \code{x} (creciente).
+#' @param S_emp Supervivencia empírica sobre \code{x}.
+#' @param S_mod Supervivencia modelada sobre \code{x}.
+#' @return Escalar \eqn{\ge 0}.
+#' @export
 calc_iae <- function(x, S_emp, S_mod) {
   x <- as.numeric(x)
   diffs <- abs(as.numeric(S_emp) - as.numeric(S_mod))
@@ -24,7 +61,13 @@ calc_iae <- function(x, S_emp, S_mod) {
   sum(dx * (diffs[-length(diffs)] + diffs[-1]) / 2.0)
 }
 
-#' Todas las métricas (R\u00b2, MAE, RMSE, MaxAE, IAE).
+#' Todas las métricas a la vez: R², MAE, RMSE, MaxAE, IAE.
+#'
+#' @param x Rejilla de puntos \code{x} (creciente).
+#' @param S_emp Supervivencia empírica sobre \code{x}.
+#' @param S_mod Supervivencia modelada sobre \code{x}.
+#' @return Objeto de clase \code{PuigStats} con campos \code{R2}, \code{MAE},
+#'   \code{RMSE}, \code{MaxAE} e \code{IAE}.
 #' @export
 calc_all_metrics <- function(x, S_emp, S_mod) {
   new_PuigStats(
@@ -36,7 +79,14 @@ calc_all_metrics <- function(x, S_emp, S_mod) {
   )
 }
 
-#' Dimensión efectiva k = d\u00b2/(d + 2\u00b7\u03a3_{i<j} R_ij\u00b2).
+#' Dimensión efectiva \eqn{k}.
+#'
+#' \deqn{k = d^2 / (d + 2\sum_{i<j} R_{ij}^2)}
+#' en \eqn{O(d^2)} sin descomposición espectral (razón de participación sobre
+#' la matriz de correlación muestral).
+#'
+#' @param M Matriz de datos (filas = observaciones, columnas = variables).
+#' @return Escalar \eqn{k \ge 1} (devuelve 1 para \eqn{d \le 1}).
 #' @export
 effective_dimension <- function(M) {
   M <- as.matrix(M)
@@ -51,6 +101,13 @@ effective_dimension <- function(M) {
 }
 
 #' Curva de supervivencia empírica sobre una rejilla.
+#'
+#' \deqn{S_{emp}(x) = \#\{t_i \ge x\} / N} evaluada en cada punto de la
+#' rejilla.
+#'
+#' @param times Vector de tiempos / normas observadas \eqn{\ge 0}.
+#' @param grid Rejilla de puntos \code{x} donde evaluar.
+#' @return Vector con la supervivencia empírica (misma longitud que \code{grid}).
 #' @export
 empirical_survival <- function(times, grid) {
   times <- as.numeric(times); grid <- as.numeric(grid)
@@ -241,8 +298,26 @@ empirical_survival <- function(times, grid) {
 
 #' Ajusta datos a la distribución de Puig.
 #'
-#' Acepta `data.frame`, `matrix` (filas = observaciones) o vector numérico 1D.
-#' Métodos: `"dynamic"`, `"fixed"`, `"numerical"`; `k_fixed` para vectores.
+#' Acepta \code{data.frame}, \code{matrix} (filas = observaciones) o vector
+#' numérico 1D.
+#'
+#' @param Data Entrada numérica: \code{data.frame} (múltiples variables),
+#'   \code{matrix} (\eqn{n \times d}) o vector 1D (normas / tiempos).
+#' @param vars Vector con los nombres de las columnas a utilizar (solo
+#'   \code{data.frame}). Si es \code{NULL}, usa todas las numéricas.
+#' @param time_col Nombre de la columna con el indicador / tiempo total; si es
+#'   \code{NULL} se calcula como \eqn{\sqrt{\sum x_j^2}}.
+#' @param times Vector numérico alternativo de tiempos (ignorado en
+#'   \code{data.frame}).
+#' @param method \code{"dynamic"} (por defecto), \code{"fixed"} (\eqn{k = d}),
+#'   \code{"numerical"} (optimización conjunta). Para vector 1D:
+#'   \code{"dynamic"}/\code{"numerical"} optimizan \eqn{(\lambda, k, B)} en 3D
+#'   con Nelder-Mead; \code{"fixed"} fija \eqn{k} con \code{k_fixed}.
+#' @param k_fixed Valor fijo de \eqn{k} (\eqn{\ge 1}) para vectores 1D;
+#'   puede ser \code{NULL} para ajuste dinámico.
+#' @return Objeto de clase \code{PuigFitResult}: lista con campos
+#'   \code{params} (\code{PuigDistribution}), \code{indicator} (vector de
+#'   normas / indicadores) y \code{stats} (\code{PuigStats}).
 #' @export
 Puig_fit <- function(Data, vars = NULL, time_col = NULL, times = NULL,
                      method = "dynamic", k_fixed = NULL) {

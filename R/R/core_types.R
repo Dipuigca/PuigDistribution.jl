@@ -5,6 +5,14 @@ new_puig <- function(lam, k, T) {
             class = "PuigDistribution")
 }
 
+#' Distribución de Puig: chi no central generalizada de dimensión real k.
+#'
+#' @param lam Norma del vector de medias (\eqn{\lambda \ge 0}).
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Parámetro de escala / precisión (\eqn{T > 0}, \eqn{T = 1/\sigma^2}).
+#' @return Objeto de clase \code{PuigDistribution}: lista con campos
+#'   \code{lam}, \code{k} y \code{T}.
+#' @export
 PuigDistribution <- function(lam, k, T) {
   lam <- as.numeric(lam); k <- as.numeric(k); T <- as.numeric(T)
   if (lam < 0) stop("\u03bb debe ser \u2265 0")
@@ -22,6 +30,15 @@ new_mb <- function(k, B) {
   structure(list(k = as.numeric(k), B = as.numeric(B)), class = "MB")
 }
 
+#' Distribución límite Maxwell–Boltzmann (\eqn{\lambda = 0}).
+#'
+#' Caso límite de la distribución de Puig con \eqn{\lambda = 0}; parametrizada
+#' por \eqn{k} (dimensión) y \eqn{B = 1/T} (escala / dispersión térmica).
+#'
+#' @param k Dimensión / grados de libertad reales (\eqn{k \ge 1}).
+#' @param B Parámetro de escala (\eqn{B > 0}).
+#' @return Objeto de clase \code{MB}: lista con campos \code{k} y \code{B}.
+#' @export
 MB <- function(k, B) {
   k <- as.numeric(k); B <- as.numeric(B)
   if (k < 1) stop("k debe ser \u2265 1")

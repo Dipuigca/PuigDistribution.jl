@@ -24,7 +24,19 @@
          numeric(1))
 }
 
-#' Cuantil Q(p) tal que F(Q(p)) = p (bisección). Vectorizado sobre p.
+#' Cuantil \eqn{Q(p)} tal que \eqn{F(Q(p)) = p}.
+#'
+#' Búsqueda por bisección sobre la acumulada; vectorizado sobre \code{p}.
+#'
+#' @param p Probabilidades en \eqn{[0, 1]} (escalar o vector).
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @param tol Tolerancia de longitud del intervalo de bisección.
+#' @param maxit Número máximo de iteraciones.
+#' @return Cuantil \eqn{Q(p)} (escalar o vector). \code{Q(0) = 0},
+#'   \code{Q(1) = +\infty}.
 #' @export
 Puig_quantile <- function(p, lam, k = NULL, T = NULL, tol = 1e-10, maxit = 200) {
   p <- as.numeric(p)
@@ -38,14 +50,26 @@ Puig_quantile <- function(p, lam, k = NULL, T = NULL, tol = 1e-10, maxit = 200) 
   .puig_quantile(p, lam, k, T, tol, maxit)
 }
 
-#' Intervalo central al 98%: (P1, P99).
+#' Intervalo central al 98\%: \eqn{(P_1, P_{99})}.
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Vector con nombres \code{lo}/\code{hi}.
 #' @export
 Puig_ci98 <- function(lam, k = NULL, T = NULL) {
   q <- Puig_quantile(c(0.01, 0.99), lam, k, T)
   c(lo = q[1], hi = q[2])
 }
 
-#' Intervalo central al 99.8%: (P0.1, P99.9).
+#' Intervalo central al 99.8\%: \eqn{(P_{0.1}, P_{99.9})}.
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Vector con nombres \code{lo}/\code{hi}.
 #' @export
 Puig_ci996 <- function(lam, k = NULL, T = NULL) {
   q <- Puig_quantile(c(0.001, 0.999), lam, k, T)
@@ -66,7 +90,14 @@ Puig_ci996 <- function(lam, k = NULL, T = NULL) {
   sum(Fv * h)
 }
 
-#' Entropía diferencial H(X) = -\U222b f(x)\u00b7log f(x) dx (trapecio).
+#' Entropía diferencial \eqn{H(X) = -\int f(x)\log f(x)\,dx}.
+#'
+#' Integración numérica por la regla del trapecio sobre el intervalo
+#' \eqn{[P_{0.1}, P_{99.9}]}.
+#'
+#' @param dist Objeto \code{PuigDistribution} o \code{MB}.
+#' @param N Número de puntos de la rejilla de integración (por defecto 400).
+#' @return Entropía diferencial (escalar, en nats).
 #' @export
 Puig_entropy <- function(dist, N = 400) {
   if (is.MB(dist)) return(.puig_entropy(0, dist$k, 1.0 / dist$B, N))
@@ -84,7 +115,18 @@ Puig_entropy <- function(dist, N = 400) {
   sqrt(W / T)
 }
 
-#' Muestreo exacto: X = \u221a(W/T), W ~ \U0001d45f^2(k, \u03bb\u00b2T).
+#' Muestreo pseudoaleatorio exacto.
+#'
+#' Representación exacta: \eqn{X = \sqrt{W/T}} con \eqn{W \sim \chi^2(k,
+#' \lambda^2 T)}; para \eqn{\lambda = 0}, \eqn{W \sim \operatorname{Gamma}(k/2,
+#' 2/T)}.
+#'
+#' @param n Número de muestras.
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Vector numérico de longitud \code{n} con \eqn{X \ge 0}.
 #' @export
 Puig_rand <- function(n, lam, k = NULL, T = NULL) {
   n <- as.integer(n)

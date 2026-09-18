@@ -81,7 +81,17 @@
 
 # ---- API pública ----
 
-#' Media teórica E[X] = \u221a(\u03c0/(2T)) L_{1/2}^{(k/2-1)}(-\u03bb\u00b2T/2).
+#' Media teórica de la distribución de Puig.
+#'
+#' \deqn{E[X] = \sqrt{\pi/(2T)} \cdot L_{1/2}^{(k/2-1)}(-\lambda^2 T/2)}
+#' mediante la función confluente de Kummer / Laguerre generalizada. Acepta
+#' parámetros escalares o un objeto \code{PuigDistribution} / \code{MB}.
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB} (entonces \code{k} y \code{T} se ignoran).
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Media \eqn{E[X]} (escalar).
 #' @export
 Puig_mean <- function(lam, k = NULL, T = NULL) {
   if (is.MB(lam)) return(._puig_mean(0, lam$k, 1.0 / lam$B))
@@ -89,7 +99,15 @@ Puig_mean <- function(lam, k = NULL, T = NULL) {
   ._puig_mean(lam, k, T)
 }
 
-#' Varianza teórica.
+#' Varianza teórica de la distribución de Puig.
+#'
+#' \deqn{\operatorname{Var}(X) = E[X^2] - (E[X])^2,\qquad E[X^2] = k/T + \lambda^2}
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Varianza (escalar).
 #' @export
 Puig_var <- function(lam, k = NULL, T = NULL) {
   if (is.MB(lam)) return(._puig_var(0, lam$k, 1.0 / lam$B))
@@ -98,6 +116,14 @@ Puig_var <- function(lam, k = NULL, T = NULL) {
 }
 
 #' Desviación estándar teórica.
+#'
+#' \deqn{\sigma = \sqrt{\operatorname{Var}(X)}}
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return \eqn{\sigma} (escalar).
 #' @export
 Puig_std <- function(lam, k = NULL, T = NULL) {
   if (is.MB(lam)) return(._puig_std(0, lam$k, 1.0 / lam$B))
@@ -105,7 +131,15 @@ Puig_std <- function(lam, k = NULL, T = NULL) {
   ._puig_std(lam, k, T)
 }
 
-#' Asimetría estandarizada \u03b3\u2081.
+#' Asimetría estandarizada de la distribución de Puig.
+#'
+#' \deqn{\gamma_1 = E[(X-\mu)^3] / \sigma^3}
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Asimetría \eqn{\gamma_1} (escalar).
 #' @export
 Puig_skewness <- function(lam, k = NULL, T = NULL) {
   if (is.MB(lam)) return(._puig_skewness(0, lam$k, 1.0 / lam$B))
@@ -113,7 +147,15 @@ Puig_skewness <- function(lam, k = NULL, T = NULL) {
   ._puig_skewness(lam, k, T)
 }
 
-#' Kurtosis (no restada) \u03b3\u2082.
+#' Kurtosis (4º momento estandarizado, no restado).
+#'
+#' \deqn{\gamma_2 = E[(X-\mu)^4] / \sigma^4}
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Kurtosis \eqn{\gamma_2} (escalar).
 #' @export
 Puig_kurtosis <- function(lam, k = NULL, T = NULL) {
   if (is.MB(lam)) return(._puig_kurtosis(0, lam$k, 1.0 / lam$B))
@@ -121,7 +163,19 @@ Puig_kurtosis <- function(lam, k = NULL, T = NULL) {
   ._puig_kurtosis(lam, k, T)
 }
 
-#' Momentos raw \u03bc\u2081..\u03bc\u2099. Con n=4 devuelve vector con nombre.
+#' Momentos raw \eqn{\mu_1, \dots, \mu_n}.
+#'
+#' Semillas explícitas para \eqn{\mu_1} (Laguerre), \eqn{\mu_2 = k/T+\lambda^2},
+#' \eqn{\mu_3} (Laguerre) y \eqn{\mu_4}; recurrencia de tres términos
+#' \eqn{O(n)} para \eqn{n \ge 5}. Con \code{n = 4} devuelve un vector con
+#' nombres \eqn{\mu_1, \dots, \mu_4}.
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @param n Número de momentos a calcular (\eqn{n \ge 1}).
+#' @return Vector numérico de longitud \code{n}.
 #' @export
 Puig_moments <- function(lam, k = NULL, T = NULL, n = NULL) {
   if (is.MB(lam)) {
@@ -139,7 +193,14 @@ Puig_moments <- function(lam, k = NULL, T = NULL, n = NULL) {
   ._puig_moments(lam, k, T, n_val)
 }
 
-#' Estadísticos: mean, var, sig, skewness, kurtosis.
+#' Estadísticos teóricos completos.
+#'
+#' @param lam Parámetro \eqn{\lambda \ge 0}, o un objeto \code{PuigDistribution}
+#'   o \code{MB}.
+#' @param k Dimensión efectiva continua (\eqn{k \ge 1}).
+#' @param T Escala / precisión (\eqn{T > 0}).
+#' @return Lista con campos \code{mean}, \code{var}, \code{sig},
+#'   \code{skewness} y \code{kurtosis}.
 #' @export
 Puig_stats <- function(lam, k = NULL, T = NULL) {
   if (is.MB(lam)) return(._puig_stats(0, lam$k, 1.0 / lam$B))

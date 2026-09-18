@@ -47,7 +47,39 @@
   exp(lgamma(b) - lgamma(a)) * y^(a - b) * total
 }
 
-#' Función de Laguerre generalizada L_n^(α)(x) para n, α reales y x ≤ 0.
+#' Serie hipergeométrica confluente de Kummer M(a, b, z).
+#'
+#' Serie directa \eqn{M(a,b,z) = \sum_k (a)_k z^k / ((b)_k k!)} en doble
+#' precisión, convergente para \eqn{z} moderado (uso típico: rama
+#' \eqn{y < 20} de \code{laguerre_real}).
+#'
+#' @param a Primer parámetro.
+#' @param b Segundo parámetro.
+#' @param z Argumento (real).
+#' @param maxterms Máximo número de términos antes de abandonar (por defecto
+#'   15000).
+#' @return Valor de \eqn{M(a,b,z)} en doble precisión.
+#' @export
+kummer_M_stable <- function(a, b, z, maxterms = 15000) {
+  .kummer_M_stable_float(a, b, z, maxterms = maxterms)
+}
+
+#' Función de Laguerre generalizada \eqn{L_n^{(\alpha)}(x)} para \eqn{n},
+#' \eqn{\alpha} reales y \eqn{x \le 0}.
+#'
+#' Evaluación numéricamente robusta por ramas (mismo esquema que el núcleo
+#' Julia corregido): \eqn{L_n^{(\alpha)}(x) = \Gamma(n+\alpha+1)/(\Gamma(n+1)
+#' \Gamma(\alpha+1)) \cdot M(-n, \alpha+1, x)} con \eqn{y = -x \ge 0}: serie
+#' directa para \eqn{y < 20} y expansión asintótica de la rama decreciente
+#' para \eqn{y \ge 20}, evitando la cancelación catastrófica de la serie de
+#' Kummer con argumento positivo enorme (momentos con \eqn{\lambda} grande).
+#'
+#' @param n Orden real de la Laguerre.
+#' @param alpha Parámetro \eqn{\alpha}.
+#' @param x Argumento (\eqn{x \le 0}).
+#' @param precBits Parámetro de compatibilidad (no utilizado en R; la
+#'   evaluación interna es en doble precisión).
+#' @return Valor de \eqn{L_n^{(\alpha)}(x)}.
 #' @export
 laguerre_real <- function(n, alpha, x, precBits = 384) {
   n <- as.numeric(n); alpha <- as.numeric(alpha); x <- as.numeric(x)
