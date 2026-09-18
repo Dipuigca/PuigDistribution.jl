@@ -2,8 +2,7 @@
 # Uso: Rscript R/tests/run_golden_tests.R
 # (debe invocarse desde la raíz del repositorio)
 
-rfiles <- list.files("R", pattern = "\\.R$", full.names = TRUE)
-rfiles <- rfiles[!grepl("tests", rfiles)]
+rfiles <- list.files(file.path("R", "R"), pattern = "\\.R$", full.names = TRUE)
 for (f in rfiles) source(f)
 
 golden <- file.path("golden")

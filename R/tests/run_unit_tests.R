@@ -1,8 +1,7 @@
 # Tests unitarios del port R (port de test/runtests.jl del paquete Julia).
 # Uso: Rscript R/tests/run_unit_tests.R
 
-rfiles <- list.files("R", pattern = "\\.R$", full.names = TRUE)
-rfiles <- rfiles[!grepl("tests", rfiles)]
+rfiles <- list.files(file.path("R", "R"), pattern = "\\.R$", full.names = TRUE)
 for (f in rfiles) source(f)
 
 set.seed(0)

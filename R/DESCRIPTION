@@ -14,5 +14,5 @@ Depends: R (>= 4.0)
 Imports: stats
 Suggests: ggplot2, Rmpfr, gmp
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 NeedsCompilation: no
