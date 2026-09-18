@@ -325,13 +325,46 @@ function kummer_M_stable(a::ArbReal, b::ArbReal, z::ArbReal; maxterms::Int=15000
     end
     return total
 end
+# Pochhammer (x)_k en ArbReal.
+function _pochhammer(x::ArbReal, k::Int)
+    out = one(x)
+    for j in 0:(k - 1)
+        out *= x + j
+    end
+    return out
+end
+# Expansión asintótica de la rama decreciente:
+#   e^{-y}·M(a, b, y) ≈ Γ(b)/Γ(a)·y^{a-b}·Σₖ (1-a)_k (b-a)_k / k! · y^{-k}
+# Válida y razonablemente grande (en la práctica |x|·≥20) y muy precisa para
+# y grande (uso típico λ²T/2 ≥ 20). Evita el fallo de la serie directa de
+# Kummer cuando el argumento positivo es enorme.
+function kummer_1f1_decay(a::ArbReal, b::ArbReal, y::ArbReal; maxterms::Int=80)
+    total = zero(y)
+    for k in 0:maxterms
+        c = _pochhammer(one(y) - a, k) * _pochhammer(b - a, k) / factorial(k)
+        term = c * y^(-k)
+        total += term
+        k >= 6 && abs(term) < abs(total) * ArbReal(10)^(-30) && break
+    end
+    return ArbNumerics.gamma(b) / ArbNumerics.gamma(a) * y^(a - b) * total
+end
 function laguerre_real(n::Real, α::Real, x::Real)
     setworkingprecision(ArbReal, bits=128)
     nA, αA, xA = ArbReal(n), ArbReal(α), ArbReal(x)
     coef = ArbNumerics.gamma(nA + αA + 1) / (ArbNumerics.gamma(nA + 1) * ArbNumerics.gamma(αA + 1))
 
-    # Transformación de Kummer: M(-n, α+1, x) = exp(x) * M(α+1+n, α+1, -x)
-    Mval = exp(xA) * kummer_M_stable(αA + 1 + nA, αA + 1, -xA)
+    # L_n^{(α)}(-y) = coef·e^{-y}·M(α+1+n, α+1, y), con y = -x.
+    # - y < 20: transformación de Kummer M(-n, b, -y) = e^{-y}·M(b+n, b, y)
+    #   (serie con cancelaciones moderadas, precisa en 128 bits).
+    # - y ≥ 20: expansión asintótica de la rama decreciente (la serie de
+    #   Kummer con argumento positivo enorme falla incluso en alta precisión).
+    y = -xA
+    b = αA + 1
+    if y < 20
+        Mval = exp(xA) * kummer_M_stable(b + nA, b, -xA)
+    else
+        Mval = kummer_1f1_decay(b + nA, b, y)
+    end
     return Float64(coef * Mval)
 end
 """
